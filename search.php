@@ -5,6 +5,8 @@ use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 require 'vendor/autoload.php';
 
+require 'credential.php';
+
 $performance = validate($_POST['performance']);
 $numberOfBits = validate($_POST['number_of_bits']);
 $isaType = validate($_POST['isa_type']);
@@ -98,8 +100,8 @@ if (count($validationErrors) === 0) {
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'press@anysilicon.com';
-        $mail->Password   = 'ILOVEASRA';
+        $mail->Username   = $smtpUsername;
+        $mail->Password   = $smtpPassword;
         $mail->SMTPSecure = 'tls';
         $mail->Port       = 587;
         $mail->setFrom('press@anysilicon.com', 'AnySilicon');
@@ -135,6 +137,33 @@ if (count($validationErrors) === 0) {
         }
         $mail->Body    = $resultBody;
         $mail->send();
+
+
+
+        $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = $smtpUsername;
+        $mail->Password   = $smtpPassword;
+        $mail->SMTPSecure = 'tls';
+        $mail->Port       = 587;
+        $mail->setFrom('press@anysilicon.com', 'AnySilicon');
+        $mail->addAddress('info@anysilicon.com');
+        $mail->isHTML(true);
+        $mail->Subject = 'CPU IP Core Search';
+        $resultBody = '<html><head><style>.search_parameters th, td {padding-top: 5px;padding-bottom: 5px;padding-left: 30px;padding-right: 30px;}</style></head><body><div style="text-align: center; font-weight: bold; font-size: 20px;">The user whose email address is: ' . $email . ' made the search using the following search parameters.</div>';
+        $resultBody .= '<div style="font-weight: bold; font-size: 18px; margin-bottom: 15px; margin-top: 15px;">Search Parameters:</div>';
+        $resultBody .= '<table style="width: 100%;" class="search_parameters"><tr><td style="font-weight: bold;">Performance</td><td>' . $performance . '</td></tr><tr><td style="font-weight: bold;">Number of Bits</td><td>' . $numberOfBits . '</td></tr><tr><td style="font-weight: bold;">ISA Type</td><td>' . $isaType . '</td></tr>';
+        if ($keyword !== '' & $keyword !== null) {
+            $resultBody .=  '<tr><td style="font-weight: bold;">Keyword</td><td>' . $keyword . '</td></tr>';
+        }
+        $resultBody .= (int)$getPriceQuote === 1 ? '<tr><td style="font-weight: bold;">Wants Price</td><td>Yes</td></tr></table>' : '</table>';
+        $resultBody .= '</body></html>';
+        $mail->Body    = $resultBody;
+        $mail->send();
+
+
     } else {
         echo json_encode(['success' => 0, 'message' => 'CSV file reading failed.']);
     }
